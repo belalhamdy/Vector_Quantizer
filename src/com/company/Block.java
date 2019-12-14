@@ -1,6 +1,7 @@
 package com.company;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class Block {
     int[] data;
@@ -62,15 +63,15 @@ public class Block {
         return sum;
     }
 
-    static double[] getAverage (Block[] blocks){
-        double[] ret = new double[blocks[0].data.length];
+    static double[] getAverage (List<Block> blocks){
+        double[] ret = new double[blocks.get(0).data.length];
         Arrays.fill(ret,0);
 
         for (int i = 0 ; i<ret.length ; ++i){
             for (Block block: blocks) {
                 ret[i]+=block.data[i];
             }
-            ret[i]/=blocks.length;
+            ret[i]/=blocks.size();
         }
         return ret;
     }
