@@ -16,16 +16,17 @@ public class VectorQuantizer {
             }
         }
 
-        int maxBlocks,blockSize, extraRows = 0 , extraColumns = 0;
-        int[][] image;
-        List<Block> ImageBlocks;
-        Node root;
-        List<Node> leafs = new ArrayList<>(); // to store all leafs to help in splitting
+        private int maxBlocks,blockSize, extraRows = 0 , extraColumns = 0;
+        private int[][] image;
+        private List<Block> ImageBlocks;
+        private Node root;
+        private List<Node> leafs = new ArrayList<>(); // to store all leafs to help in splitting
 
         VectorQuantizer(int[][] image, int blockSize , int maxBlocks){
+
             this.image = resizeImage(image,blockSize);
             this.blockSize = blockSize;
-            this.maxBlocks = maxBlocks;
+            this.maxBlocks = getNearestPower(maxBlocks);
 
             this.ImageBlocks = generateBlocks();
 
@@ -33,7 +34,27 @@ public class VectorQuantizer {
             leafs.add(root);
         }
 
-        private void split(){
+    public int getBlockSize() {
+        return blockSize;
+    }
+
+    public List<Node> getBlocksDictionary() {
+        return leafs;
+    }
+
+    public int[][] compress(){
+            // TODO : compress image here
+            while (leafs.size() < maxBlocks){
+                split();
+            }
+            // here you have the final blocks
+            return null;
+    }
+    // rounds the number to nearest power of 2 to ensure that max blocks is power of 2
+    private int getNearestPower(int n){
+        return 1<<Integer.highestOneBit(n);
+    }
+    private void split(){
             //splits all leafs and adds them to leafs list and removes the old leafs also with splitting it adds the proper block to it's parent
 
             for (Node currentLeaf : leafs){
