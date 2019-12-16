@@ -3,13 +3,24 @@ package com.company;
 import java.util.Arrays;
 import java.util.List;
 
-public class Block {
-    int[] data;
+import static java.lang.System.*;
 
-    enum BLOCK_TYPE{CEIL , DEFAULT}
+public class Block {
+    double[] data;
+
+    enum BLOCK_TYPE{CEIL,ROUND , DEFAULT}
+
+    @Override
+    public String toString() {
+        StringBuilder ret = new StringBuilder();
+        for (double d : data){
+            ret.append(d).append(" ");
+        }
+        return ret.toString();
+    }
 
     Block(int[][] image, int blockIndex, int blockSize){
-        this.data = new int[blockSize*blockSize];
+        this.data = new double[blockSize*blockSize];
 
         int width = image[0].length;
         int height = image.length;
@@ -30,7 +41,7 @@ public class Block {
     }
 
     Block(double[] data, BLOCK_TYPE type){
-        this.data = new int[data.length];
+        this.data = new double[data.length];
 
         if (type == BLOCK_TYPE.CEIL){
             for (int i = 0 ; i<data.length ; ++i){
@@ -38,32 +49,29 @@ public class Block {
             }
         }
 
-        else{
+        else if (type == BLOCK_TYPE.ROUND){
             for (int i = 0 ; i<data.length ; ++i){
                 this.data[i] = (int) (data[i]);
             }
         }
+        else arraycopy(data, 0, this.data, 0, data.length);
     }
 
-    long getDistance (Block other){
-        long sum = 0;
-        for (int i = 0 ; i<data.length ; ++i){
-            long difference = (data[i] - other.data[i]);
-            sum+= difference*difference;
-        }
-        return sum;
+    double getDistance (Block other){
+        return getDistance(other.data);
     }
-
     double getDistance (double[] other){
         double sum = 0;
         for (int i = 0 ; i<data.length ; ++i){
-            double difference = (data[i] - other[i]);
-            sum+= difference*difference;
+            double difference = Math.abs(data[i] - other[i]);
+            if (com.company.Main.ErrorFunctionType == Main.ErrorFunctionTypeENUM.SQUARED) difference*=difference;
+            sum+= difference;
         }
         return sum;
     }
 
     static double[] getAverage (List<Block> blocks){
+        if (blocks == null || blocks.isEmpty()) return null;
         double[] ret = new double[blocks.get(0).data.length];
         Arrays.fill(ret,0);
 
