@@ -57,12 +57,12 @@ public class VectorQuantizer {
         leafs.add(root);
 
         while (leafs.size() < maxBlocks) {
-             split();
+            split();
             distributeBlocks();
         }
 
         int MAX_LOOP = 10;
-        while (MAX_LOOP-- > 0){
+        while (MAX_LOOP-- > 0) {
             if (!enhanceDistribution()) break;
         }
 
@@ -85,15 +85,15 @@ public class VectorQuantizer {
         for (Block currentBlock : ImageBlocks) {
             double minDistance = Double.MAX_VALUE;
             Node minLeaf = ret.get(0);
-                for (Node currentLeaf : ret){
-                    double distance = currentBlock.getDistance(currentLeaf.parent);
-                    if (Double.compare(distance,minDistance) < 0){
-                        minDistance = distance;
-                        minLeaf = currentLeaf;
-                    }
+            for (Node currentLeaf : ret) {
+                double distance = currentBlock.getDistance(currentLeaf.parent);
+                if (Double.compare(distance, minDistance) < 0) {
+                    minDistance = distance;
+                    minLeaf = currentLeaf;
                 }
+            }
 
-                minLeaf.addBlock(currentBlock);
+            minLeaf.addBlock(currentBlock);
         }
         leafs = ret;
     }
@@ -103,7 +103,8 @@ public class VectorQuantizer {
         List<Node> ret = new ArrayList<>();
         for (Node currentLeaf : leafs) {
 
-            double[] average = currentLeaf.getAverage();;
+            double[] average = currentLeaf.getAverage();
+            ;
             Block leftParent = new Block(average, Block.BLOCK_TYPE.ROUND);
             Block rightParent = new Block(average, Block.BLOCK_TYPE.CEIL);
 
@@ -113,25 +114,26 @@ public class VectorQuantizer {
         leafs = ret;
     }
 
-    private boolean enhanceDistribution(){
-        for (Node leaf : leafs){
+    private boolean enhanceDistribution() {
+        for (Node leaf : leafs) {
             leaf.parent.data = leaf.getAverage();
         }
         distributeBlocks();
 
-        boolean ret = true;
+        boolean ret = false;
         for (Node leaf : leafs) {
             if (compareAverages(leaf.getAverage(), leaf.parent.data) != 0) {
-                ret = false;
+                ret = true;
             }
         }
         return ret;
     }
 
-    private int compareAverages(double[] first , double[] second){
+    private int compareAverages(double[] first, double[] second) {
         if (first == null || second == null) return Integer.MAX_VALUE;
-        for (int i = 0 ; i<first.length; ++i){
-            if (first.length != second.length || first[i] != second[i]) return Math.min(Double.compare(first[i] , second[i]),1);
+        for (int i = 0; i < first.length; ++i) {
+            if (first.length != second.length || first[i] != second[i])
+                return Math.min(Double.compare(first[i], second[i]), 1);
         }
         return 0;
     }

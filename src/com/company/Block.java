@@ -7,7 +7,7 @@ import static java.lang.System.*;
 
 public class Block {
     double[] data;
-
+    int index;
     enum BLOCK_TYPE{CEIL,ROUND , DEFAULT}
 
     @Override
@@ -21,6 +21,7 @@ public class Block {
 
     Block(int[][] image, int blockIndex, int blockSize){
         this.data = new double[blockSize*blockSize];
+        this.index = blockIndex;
 
         int width = image[0].length;
         int height = image.length;
