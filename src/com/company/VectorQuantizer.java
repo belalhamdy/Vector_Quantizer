@@ -126,6 +126,7 @@ public class VectorQuantizer {
     private boolean enhanceDistribution() {
         for (Node leaf : leafs) {
             leaf.parent.data = leaf.getAverages();
+            leaf.clearBlocks();
         }
         distributeBlocks();
 
