@@ -1,23 +1,18 @@
 package com.company;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class Utilities {
-    public static int[][] readImageToArray(String path) throws IOException {
-        return readImageToArray(path, -1);
+    public static int[][] readImageToArray(BufferedImage img) {
+        return readImageToArray(img, -1);
     }
 
-    public static int[][] readImageToArray(String path, int band) throws IOException {
-        File file = new File(path);
-        BufferedImage img = ImageIO.read(file);
-
+    public static int[][] readImageToArray(BufferedImage img, int band) {
         int width = img.getWidth();
         int height = img.getHeight();
 
@@ -39,7 +34,7 @@ public class Utilities {
         return ret;
     }
 
-    public static void saveArrayToImage(int[][] imageArray, String to, String name) throws IOException {
+    public static BufferedImage saveArrayToImage(int[][] imageArray) {
         int[] result = Arrays.stream(imageArray).flatMapToInt(Arrays::stream).toArray();
         BufferedImage outputImage = new BufferedImage(imageArray[0].length, imageArray.length, BufferedImage.TYPE_INT_RGB);
         WritableRaster raster = outputImage.getRaster();
@@ -47,13 +42,10 @@ public class Utilities {
         for (int b = 0; b < raster.getNumBands(); ++b)
             raster.setSamples(0, 0, imageArray[0].length, imageArray.length, b, result);
 
-        ImageIO.write(outputImage, "png", new File(to + "/" + name + ".png"));
-
+        return outputImage;
     }
 
-    public static boolean saveCompressionData(CompressionData compressionData, String to, String name) throws Exception {
-        String path = to + "/" + name + ".txt";
-        if (Files.exists(Paths.get(path))) throw new Exception("File already exists cannot save to it");
+    public static void saveCompressionData(CompressionData compressionData, File path) throws Exception {
         PrintWriter writer = new PrintWriter(path, "UTF-8");
 
         writer.println(compressionData.blockSize);
@@ -66,12 +58,11 @@ public class Utilities {
         writer.println(compressionData.compressedImageSize);
         writer.println(compressionData.compressedImage);
         writer.close();
-        return true;
     }
 
-    public static CompressionData readCompressionData(String path) throws IOException {
+    public static CompressionData readCompressionData(File path) throws IOException {
         String blockSize, dictionarySize, extraWidth, extraHeight, imageWidth, imageHeight, dictionary, compressedImageSize, compressedImage;
-        try (BufferedReader br = new BufferedReader(new FileReader(new File(path)))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             blockSize = br.readLine();
             dictionarySize = br.readLine();
             extraWidth = br.readLine();

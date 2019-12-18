@@ -6,16 +6,17 @@ import java.util.List;
 import static java.lang.System.*;
 
 public class Block {
+
     enum ErrorFunctionType {
         NORMAL, SQUARED
     }
 
-    public static ErrorFunctionType errorFunctionType = ErrorFunctionType.NORMAL;
+    private static ErrorFunctionType errorFunctionType = ErrorFunctionType.NORMAL;
 
     double[] data;
     int index;
 
-    enum BlockType {CEIL, FLOOR}
+    enum BlockType {CEIL, FLOOR, DEFAULT}
 
     @Override
     public String toString() {
@@ -45,23 +46,30 @@ public class Block {
         }
     }
 
-    Block(double[] data, BlockType type) {
-        this.data = new double[data.length];
-
-        if (type == BlockType.CEIL) {
-            for (int i = 0; i < data.length; ++i) {
-                //not ceil because if data[i] was an integer, both ceil and floor would be the same.
-                this.data[i] = Math.floor(data[i] + 1);
-            }
-        } else if (type == BlockType.FLOOR) {
-            for (int i = 0; i < data.length; ++i) {
-
-                this.data[i] = Math.floor(data[i]);
-            }
-        } else arraycopy(data, 0, this.data, 0, data.length);
+    public Block(double[] averages) {
+        this(averages, BlockType.DEFAULT);
     }
 
-    double getDistance(Block other) {
+    public Block(double[] data, BlockType type) {
+        this.data = new double[data.length];
+
+        for (int i = 0; i < data.length; ++i) {
+            switch (type) {
+                case CEIL:
+                    //not ceil because if data[i] was an integer, both ceil and floor would be the same.
+                    this.data[i] = Math.floor(data[i] + 1);
+                    break;
+                case FLOOR:
+                    this.data[i] = Math.floor(data[i]);
+                    break;
+                default:
+                    this.data[i] = Math.round(data[i]);
+                    break;
+            }
+        }
+    }
+
+    double getDistanceTo(Block other) {
         double sum = 0;
         for (int i = 0; i < data.length; ++i) {
             double difference = Math.abs(data[i] - other.data[i]);
@@ -71,7 +79,8 @@ public class Block {
         return sum;
     }
 
-    static double[] getAverage(List<Block> blocks) {
+    static double[] getAverages(List<Block> blocks) {
+        if (blocks.isEmpty()) return null;
         double[] ret = new double[blocks.get(0).data.length];
         Arrays.fill(ret, 0);
 

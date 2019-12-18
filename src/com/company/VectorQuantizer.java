@@ -10,26 +10,21 @@ public class VectorQuantizer {
         Block parent;
 
         Node(Block parent) {
+            this.blocks = new ArrayList<>();
             this.parent = parent;
         }
 
         public double[] getAverages() {
-            return Block.getAverage(this.blocks);
+            return Block.getAverages(this.blocks);
         }
 
         public void addBlock(Block block) {
-            if (this.blocks == null) this.blocks = new ArrayList<>();
             this.blocks.add(block);
         }
 
         public void clearBlocks() {
-            if (this.blocks != null)
-                this.blocks.clear();
-            this.blocks = null;
-        }
 
-        public void setBlocks(List<Block> blocks) {
-            this.blocks = blocks;
+            this.blocks.clear();
         }
     }
 
@@ -98,6 +93,7 @@ public class VectorQuantizer {
         for (Node currentLeaf : leafs) {
 
             double[] average = currentLeaf.getAverages();
+            if (average == null) average = new double[blockSize * blockSize];
 
             Block leftParent = new Block(average, Block.BlockType.FLOOR);
             Block rightParent = new Block(average, Block.BlockType.CEIL);
@@ -113,7 +109,7 @@ public class VectorQuantizer {
             double minDistance = Double.MAX_VALUE;
             Node minLeaf = leafs.get(0);
             for (Node currentLeaf : leafs) {
-                double distance = currentBlock.getDistance(currentLeaf.parent);
+                double distance = currentBlock.getDistanceTo(currentLeaf.parent);
                 if (Double.compare(distance, minDistance) < 0) {
                     minDistance = distance;
                     minLeaf = currentLeaf;
@@ -124,8 +120,11 @@ public class VectorQuantizer {
     }
 
     private boolean enhanceDistribution() {
+        if (leafs.size() == 1) return true;
+
         for (Node leaf : leafs) {
             leaf.parent.data = leaf.getAverages();
+            if (leaf.parent.data == null) leaf.parent.data = new double[blockSize * blockSize];
             leaf.clearBlocks();
         }
         distributeBlocks();
@@ -156,7 +155,7 @@ public class VectorQuantizer {
                 ret.append((int) val).append(" ");
             }
             ret = new StringBuilder(ret.toString().trim());
-            ret.append("\n");
+            ret.append(" ");
         }
         return ret.toString().trim();
     }
@@ -192,7 +191,6 @@ public class VectorQuantizer {
     }
 
     private void stringDictionaryFill(String dictionary) {
-
         int[] dictionaryArray = stringToIntArray(dictionary);
         int elementSize = blockSize * blockSize;
         decompressionDictionary = new int[dictionaryArray.length][elementSize];
@@ -206,19 +204,17 @@ public class VectorQuantizer {
 
     private void fillBlock(int[][] image, int index, int[] block) {
         int width = image[0].length;
-        int height = image.length;
 
         int blocksPerRow = width / blockSize;
-        int blocksPerCol = height / blockSize;
 
-
-        int startRow = (index / blocksPerRow) * blockSize;
-        int startCol = (index % blocksPerCol) * blockSize;
+        int si = (index / blocksPerRow) * blockSize;
+        int sj = (index % blocksPerRow) * blockSize;
 
         int idx = 0;
-        for (int i = startRow; i < startRow + blockSize; ++i) {
-            for (int j = startCol; j < startCol + blockSize; ++j) {
+        for (int i = si; i < si + blockSize; ++i) {
+            for (int j = sj; j < sj + blockSize; ++j) {
                 image[i][j] = block[idx++];
+
             }
         }
     }
@@ -236,9 +232,9 @@ public class VectorQuantizer {
     public CompressionData compress() {
         extendImage();
         generateBlocks();
-
-        Node root = new Node(null);
-        root.setBlocks(this.imageBlocks);
+        Node root = new Node(new Block(Block.getAverages(this.imageBlocks)));
+        for (Block v : this.imageBlocks)
+            root.addBlock(v);
         leafs.add(root);
 
         while (leafs.size() < maxBlocks) {
