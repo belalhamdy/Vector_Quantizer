@@ -38,7 +38,7 @@ public class GUI {
 
         initiateSliders();
     }
-    void initiateSliders(){
+    private void initiateSliders(){
         SpinnerNumberModel spnModel = new SpinnerNumberModel(1, 1, 50, 1);
         blockSizeSpn.setModel(spnModel);
 
