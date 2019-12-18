@@ -1,6 +1,7 @@
 package com.company;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class VectorQuantizer {
@@ -27,36 +28,13 @@ public class VectorQuantizer {
         }
     }
 
-    class CompressionData {
-        String blockSize;
-        String dictionarySize;
-        String extraRows;
-        String extraColumns;
-        String imageWidth;
-        String imageHeight;
-        String dictionary;
-        String compressedImageSize;
-        String compressedImage;
-
-        public CompressionData(String blockSize, String dictionarySize, String extraRows, String extraColumns, String imageWidth, String imageHeight, String dictionary, String compressedImageSize, String compressedImage) {
-            this.blockSize = blockSize;
-            this.dictionarySize = dictionarySize;
-            this.extraRows = extraRows;
-            this.extraColumns = extraColumns;
-            this.imageWidth = imageWidth;
-            this.imageHeight = imageHeight;
-            this.dictionary = dictionary;
-            this.compressedImageSize = compressedImageSize;
-            this.compressedImage = compressedImage;
-        }
-    }
-
     private int maxBlocks, blockSize, extraRows = 0, extraColumns = 0;
     private int[][] image, oldImage;
     private int[] compressedImage;
     private List<Block> imageBlocks;
     private List<Node> leafs = new ArrayList<>(); // to store all leafs to help in splitting
 
+    private int[][] decompressionDictionary; // blocks saved for decompression
     VectorQuantizer(int[][] image, int blockSize, int maxBlocks) {
 
         this.blockSize = blockSize;
@@ -80,7 +58,7 @@ public class VectorQuantizer {
             throw e;
         }
         stringDictionaryFill(compressionData.dictionary);
-        buildImage(stringCompressedImageToArray(compressionData.compressedImage),width,height);
+        buildDecompressedImage(stringCompressedImageToArray(compressionData.compressedImage),width,height);
 
 
 
@@ -212,10 +190,6 @@ public class VectorQuantizer {
                 image.length + "", image[0].length + "", dictionaryToString(), compressedImage.length + "",
                 compressedImageToString());
     }
-    private void buildImageFromBlocks() {
-        // TODO : Retrieve image here
-    }
-
     private void resizeImage() {
         extraRows = image.length % blockSize;
         extraColumns = image.length % blockSize;
@@ -242,19 +216,51 @@ public class VectorQuantizer {
         }
         image = resizedImage;
     }
-    private int[] stringCompressedImageToArray(String compressedImage){
-        // TODO : from string to array conversion here
-        return null;
+    private int[] stringToIntArray(String array){
+        return Arrays.stream(array.split("\\W+")).mapToInt(Integer::parseInt).toArray();
     }
-    private void buildImage(int[] compressedImage , int width , int height){
-        // TODO : reconstruct image from the compressed image here
-
-
-        oldImage = image;
-        trimImage();
+    private int[] stringCompressedImageToArray(String compressedImage){
+        return stringToIntArray(compressedImage);
     }
     private void stringDictionaryFill(String dictionary) {
-        // TODO : fill dictionary here
+
+        int[] dictionaryArray = stringToIntArray(dictionary);
+        int elementSize = blockSize*blockSize;
+        decompressionDictionary = new int[dictionaryArray.length][elementSize];
+
+        int idx = -1;
+        for (int i = 0 ; i<dictionaryArray.length ; ++i){
+            if (i % elementSize == 0) ++idx;
+            decompressionDictionary[idx][i % elementSize] = dictionaryArray[i];
+        }
+    }
+    private void fillBlock(int[][] image, int index , int[] block){
+        int width = image[0].length;
+        int height = image.length;
+
+        int blocksPerRow = width/blockSize;
+        int blocksPerCol = height/blockSize;
+
+
+        int startRow = (index / blocksPerRow) * blockSize ;
+        int startCol = (index % blocksPerCol) * blockSize;
+
+        int idx = 0;
+        for (int i = startRow ; i < startRow + blockSize ; ++i){
+            for (int j = startCol ; j < startCol + blockSize ; ++j ){
+                image[i][j] = block[idx++];
+            }
+        }
+    }
+    private void buildDecompressedImage(int[] compressedImage , int width , int height){
+        image = new int[width][height];
+        int[] currentBlock;
+        for (int i = 0 ; i<compressedImage.length ; ++i){
+            currentBlock = decompressionDictionary[compressedImage[i]];
+            fillBlock(image,i,currentBlock);
+        }
+        oldImage = image;
+        trimImage();
     }
 
     public CompressionData compress() {
