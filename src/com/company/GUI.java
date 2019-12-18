@@ -3,15 +3,12 @@ package com.company;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Hashtable;
 
 public class GUI {
 
-    public static final int DISPLAY_IMAGE_SIZE = 300;
     private JPanel mainpnl;
     private JPanel imageLeftpnl;
     private JPanel imageRightpnl;
@@ -84,6 +81,7 @@ public class GUI {
             }
         }
     }
+
     private void event_saveCompressionFileButton() {
         VectorQuantizer vq = new VectorQuantizer(
                 Utilities.readImageToArray(image),
@@ -98,7 +96,8 @@ public class GUI {
             }
         }
     }
-    private void event_loadCompressionFileButton(){
+
+    private void event_loadCompressionFileButton() {
         JFileChooser jf = new JFileChooser("D:\\");
         if (jf.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
             try {
@@ -113,13 +112,28 @@ public class GUI {
     }
 
     private void refreshCompressionResults() {
-        leftImage.setIcon(new ImageIcon(image));
+        //leftImage.setIcon(new ImageIcon(image));
+        Dimension leftSize = getScaledDimension(image.getWidth(),image.getHeight());
+        leftImage.setIcon(new ImageIcon(image.getScaledInstance(leftSize.width,leftSize.height, Image.SCALE_DEFAULT)));
         VectorQuantizer vq = new VectorQuantizer(
                 Utilities.readImageToArray(image),
                 (int) blockSizeSpn.getValue(),
                 1 << (numberBlocksSlider.getValue()));
 
         VectorQuantizer qv = new VectorQuantizer(vq.compress());
-        rightImage.setIcon(new ImageIcon(Utilities.saveArrayToImage(qv.decompress())));
+        BufferedImage right = Utilities.saveArrayToImage(qv.decompress());
+        Dimension rightSize = getScaledDimension(right.getWidth(), right.getHeight());
+        //rightImage.setIcon(rightImage);
+        rightImage.setIcon(new ImageIcon(right.getScaledInstance(rightSize.width, rightSize.height, Image.SCALE_DEFAULT)));
+    }
+
+    Dimension getScaledDimension(int width, int height) {
+
+        double widthRatio =  300.0 / width;
+        double heightRatio =  300.0 / height;
+        double ratio = Math.min(widthRatio, heightRatio);
+
+        return new Dimension((int) (width * ratio),
+                (int) (height * ratio));
     }
 }
