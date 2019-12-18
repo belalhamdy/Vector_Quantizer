@@ -36,7 +36,7 @@ public class Utilities {
 
     public static BufferedImage saveArrayToImage(int[][] imageArray) {
         int[] result = Arrays.stream(imageArray).flatMapToInt(Arrays::stream).toArray();
-        BufferedImage outputImage = new BufferedImage(imageArray[0].length, imageArray.length, BufferedImage.TYPE_INT_RGB);
+        BufferedImage outputImage = new BufferedImage(imageArray[0].length, imageArray.length, BufferedImage.TYPE_BYTE_GRAY);
         WritableRaster raster = outputImage.getRaster();
 
         for (int b = 0; b < raster.getNumBands(); ++b)
