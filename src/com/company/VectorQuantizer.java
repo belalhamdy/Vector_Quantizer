@@ -281,6 +281,7 @@ public class VectorQuantizer {
         while (MAX_LOOP-- > 0) {
             if (!enhanceDistribution()) break;
         }
+        // Tested until here
         buildCompressedImage();
         return getCompressionData();
     }
