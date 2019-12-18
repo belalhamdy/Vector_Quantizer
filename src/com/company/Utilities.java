@@ -23,7 +23,7 @@ public class Utilities {
             for (int j = 0; j < width; j++) {
                 ret[i][j] = 0;
                 if (band == -1) {
-                    for (int s = 0; s < Math.max(raster.getNumBands(), 3); ++s)
+                    for (int s = 0; s < Math.min(raster.getNumBands(), 3); ++s)
                         ret[i][j] += raster.getSample(j, i, s);
                     ret[i][j] /= raster.getNumBands();
                 } else
@@ -76,7 +76,4 @@ public class Utilities {
         return new CompressionData(blockSize, dictionarySize, extraWidth, extraHeight, imageWidth, imageHeight, dictionary, compressedImageSize, compressedImage);
     }
 
-    public static VectorQuantizer readCompressedImage(CompressionData compressionData) {
-        return new VectorQuantizer(compressionData);
-    }
 }
