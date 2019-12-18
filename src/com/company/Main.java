@@ -19,6 +19,11 @@ public class Main {
     public static ErrorFunctionTypeENUM ErrorFunctionType = ErrorFunctionTypeENUM.NORMAL;
 
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ignored) {
+        }
+        new GUI();
         int[][] im = new int[0][];
         try {
             Utilities.saveArrayToImage(LectureImage,"S://","test");
@@ -46,11 +51,8 @@ public class Main {
             System.out.println();
         }
         LectureExample().compress();
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ignored) {
-        }
-        new GUI();
+
+
     }
     static VectorQuantizer LectureExample(){
 

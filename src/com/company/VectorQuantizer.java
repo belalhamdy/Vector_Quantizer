@@ -104,6 +104,7 @@ public class VectorQuantizer {
     private void distributeBlocks() {
 
         for (Node leaf : leafs) {
+//            if (leaf.blocks != null)
             leaf.blocks.clear();
         }
 
