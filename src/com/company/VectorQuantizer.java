@@ -265,9 +265,10 @@ public class VectorQuantizer {
     }
 
     public CompressionData compress() {
-        resizeImage();
-        generateBlocks();
+        resizeImage(); // Not tested
+        generateBlocks(); // tested
 
+        //tested to tested until here
         Node root = new Node(null);
         root.setBlocks(this.imageBlocks);
         leafs.add(root);
