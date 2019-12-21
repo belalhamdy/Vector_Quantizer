@@ -91,7 +91,4 @@ public class Utilities {
         */
     }
 
-    public static VectorQuantizer readCompressedImage(CompressionData compressionData) {
-        return new VectorQuantizer(compressionData);
-    }
 }
