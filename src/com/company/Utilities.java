@@ -23,7 +23,7 @@ public class Utilities {
             for (int j = 0; j < width; j++) {
                 ret[i][j] = 0;
                 if (band == -1) {
-                    for (int s = 0; s < Math.max(raster.getNumBands(), 3); ++s)
+                    for (int s = 0; s < Math.min(raster.getNumBands(), 3); ++s)
                         ret[i][j] += raster.getSample(j, i, s);
                     ret[i][j] /= raster.getNumBands();
                 } else
@@ -36,7 +36,7 @@ public class Utilities {
 
     public static BufferedImage saveArrayToImage(int[][] imageArray) {
         int[] result = Arrays.stream(imageArray).flatMapToInt(Arrays::stream).toArray();
-        BufferedImage outputImage = new BufferedImage(imageArray[0].length, imageArray.length, BufferedImage.TYPE_INT_RGB);
+        BufferedImage outputImage = new BufferedImage(imageArray[0].length, imageArray.length, BufferedImage.TYPE_BYTE_GRAY);
         WritableRaster raster = outputImage.getRaster();
 
         for (int b = 0; b < raster.getNumBands(); ++b)
@@ -46,6 +46,13 @@ public class Utilities {
     }
 
     public static void saveCompressionData(CompressionData compressionData, File path) throws Exception {
+        FileOutputStream fos = new FileOutputStream(path);
+        ObjectOutputStream oos = new ObjectOutputStream(fos);
+        oos.writeObject(compressionData);
+        oos.flush();
+        oos.close();
+
+        /*
         PrintWriter writer = new PrintWriter(path, "UTF-8");
 
         writer.println(compressionData.blockSize);
@@ -58,9 +65,16 @@ public class Utilities {
         writer.println(compressionData.compressedImageSize);
         writer.println(compressionData.compressedImage);
         writer.close();
+        */
     }
 
-    public static CompressionData readCompressionData(File path) throws IOException {
+    public static CompressionData readCompressionData(File path) throws Exception {
+        ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(path)));
+        CompressionData cd = (CompressionData) input.readObject();
+        input.close();
+        return cd;
+
+        /*
         String blockSize, dictionarySize, extraWidth, extraHeight, imageWidth, imageHeight, dictionary, compressedImageSize, compressedImage;
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             blockSize = br.readLine();
@@ -74,6 +88,7 @@ public class Utilities {
             compressedImage = br.readLine();
         }
         return new CompressionData(blockSize, dictionarySize, extraWidth, extraHeight, imageWidth, imageHeight, dictionary, compressedImageSize, compressedImage);
+        */
     }
 
     public static VectorQuantizer readCompressedImage(CompressionData compressionData) {

@@ -1,43 +1,40 @@
 package com.company;
 
-public class CompressionData {
-    final int maxBlocks;
+import java.io.Serializable;
+import java.util.Arrays;
+
+public class CompressionData implements Serializable {
     final int blockSize;
     final int dictionarySize;
     final int extraHeight;
     final int extraWidth;
     final int imageWidth;
     final int imageHeight;
-    final int compressedImageSize;
 
-    String compressedImage;
-    String dictionary;
+    int[] compressedImage;
+    int[][] dictionary;
 
-    public CompressionData(int blockSize, int dictionarySize, int extraWidth, int extraHeight, int imageWidth, int imageHeight, String dictionary, int compressedImageSize, String compressedImage) {
+    public CompressionData(int blockSize, int dictionarySize, int extraWidth, int extraHeight, int imageWidth, int imageHeight, int[][] dictionary, int[] compressedImage) {
         this.blockSize = blockSize;
         this.dictionarySize = dictionarySize;
         this.extraWidth = extraWidth;
         this.extraHeight = extraHeight;
         this.imageWidth = imageWidth;
         this.imageHeight = imageHeight;
-        this.maxBlocks = dictionarySize; // dictionary size = max number of blocks
-        this.compressedImageSize = compressedImageSize;
 
         this.dictionary = dictionary;
         this.compressedImage = compressedImage;
     }
-    public CompressionData(String blockSize, String dictionarySize, String extraWidth, String extraHeight, String imageWidth, String imageHeight, String dictionary, String compressedImageSize, String compressedImage) {
-        this.blockSize = Integer.parseInt(blockSize.trim());
-        this.dictionarySize = Integer.parseInt(dictionarySize.trim());
-        this.extraWidth = Integer.parseInt(extraWidth.trim());
-        this.extraHeight = Integer.parseInt(extraHeight.trim());
-        this.imageWidth = Integer.parseInt(imageWidth.trim());
-        this.imageHeight = Integer.parseInt(imageHeight.trim());
-        this.maxBlocks = Integer.parseInt(dictionarySize.trim()); // dictionary size = max number of blocks
-
-        this.compressedImageSize = Integer.parseInt(compressedImageSize);
-
-        this.dictionary = dictionary;
-        this.compressedImage = compressedImage;
+    void printToConsole(){
+        System.out.println(String.format("BlockSize: %d * %d", blockSize, blockSize));
+        System.out.println(String.format("No. Blocks: %d", dictionary.length));
+        System.out.println(String.format("Extra Width: %d, Extra Height: %d", extraWidth, extraHeight));
+        System.out.println(String.format("Image Size: %d * %d", imageWidth, imageHeight));
+        System.out.println("\nCompression Dictionary: ");
+        for (int[] arr : dictionary) {
+            System.out.println(Arrays.toString(arr));
+        }
+        System.out.println("\nImage :");
+        System.out.println(Arrays.toString(compressedImage));
     }
 }

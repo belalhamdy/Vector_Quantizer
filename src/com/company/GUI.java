@@ -90,7 +90,10 @@ public class GUI {
         JFileChooser jf = new JFileChooser("D:\\");
         if (jf.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
             try {
-                Utilities.saveCompressionData(vq.compress(), jf.getSelectedFile());
+                CompressionData cd = vq.compress();
+                cd.printToConsole();
+                Utilities.saveCompressionData(cd, jf.getSelectedFile());
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -112,9 +115,8 @@ public class GUI {
     }
 
     private void refreshCompressionResults() {
-        //leftImage.setIcon(new ImageIcon(image));
-        Dimension leftSize = getScaledDimension(image.getWidth(),image.getHeight());
-        leftImage.setIcon(new ImageIcon(image.getScaledInstance(leftSize.width,leftSize.height, Image.SCALE_DEFAULT)));
+        Dimension leftSize = getScaledDimension(image.getWidth(), image.getHeight());
+        leftImage.setIcon(new ImageIcon(image.getScaledInstance(leftSize.width, leftSize.height, Image.SCALE_DEFAULT)));
         VectorQuantizer vq = new VectorQuantizer(
                 Utilities.readImageToArray(image),
                 (int) blockSizeSpn.getValue(),
@@ -123,14 +125,14 @@ public class GUI {
         VectorQuantizer qv = new VectorQuantizer(vq.compress());
         BufferedImage right = Utilities.saveArrayToImage(qv.decompress());
         Dimension rightSize = getScaledDimension(right.getWidth(), right.getHeight());
-        //rightImage.setIcon(rightImage);
+
         rightImage.setIcon(new ImageIcon(right.getScaledInstance(rightSize.width, rightSize.height, Image.SCALE_DEFAULT)));
     }
 
-    Dimension getScaledDimension(int width, int height) {
+    private Dimension getScaledDimension(int width, int height) {
 
-        double widthRatio =  300.0 / width;
-        double heightRatio =  300.0 / height;
+        double widthRatio = 300.0 / width;
+        double heightRatio = 300.0 / height;
         double ratio = Math.min(widthRatio, heightRatio);
 
         return new Dimension((int) (width * ratio),

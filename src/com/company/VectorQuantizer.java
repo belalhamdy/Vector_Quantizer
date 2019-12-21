@@ -23,7 +23,6 @@ public class VectorQuantizer {
         }
 
         public void clearBlocks() {
-
             this.blocks.clear();
         }
     }
@@ -39,7 +38,6 @@ public class VectorQuantizer {
     VectorQuantizer(int[][] image, int blockSize, int maxBlocks) {
 
         this.blockSize = blockSize;
-
         this.maxBlocks = (1 << (int) (Math.log(maxBlocks) / Math.log(2)));
 
         this.image = image;
@@ -55,8 +53,8 @@ public class VectorQuantizer {
         width = compressionData.imageWidth;
         height = compressionData.imageHeight;
 
-        stringDictionaryFill(compressionData.dictionary);
-        buildDecompressedImage(stringCompressedImageToArray(compressionData.compressedImage), width, height);
+        decompressionDictionary = compressionData.dictionary;
+        buildDecompressedImage(compressionData.compressedImage, width, height);
     }
 
 
@@ -139,6 +137,18 @@ public class VectorQuantizer {
         return jumpsaround;
     }
 
+    private void generateDictionary() {
+        decompressionDictionary = new int[leafs.size()][blockSize * blockSize];
+        for (int i = 0; i < decompressionDictionary.length; i++) {
+            int[] currentData = new int[blockSize * blockSize];
+            int idx = 0;
+            for (double val : leafs.get(i).parent.data) {
+                currentData[idx++] = (int) val;
+            }
+            decompressionDictionary[i] = currentData;
+        }
+    }
+
     private void buildCompressedImage() {
         compressedImage = new int[(image.length * image[0].length) / (blockSize * blockSize)]; // number of blocks = ImageArea / blocks area
         for (int i = 0; i < leafs.size(); ++i) {
@@ -148,28 +158,10 @@ public class VectorQuantizer {
         }
     }
 
-    private String dictionaryToString() {
-        StringBuilder ret = new StringBuilder();
-        for (Node curr : leafs) {
-            for (double val : curr.parent.data) {
-                ret.append((int) val).append(" ");
-            }
-            ret = new StringBuilder(ret.toString().trim());
-            ret.append(" ");
-        }
-        return ret.toString().trim();
-    }
-
-    private String compressedImageToString() {
-        StringBuilder ret = new StringBuilder();
-        for (int i : compressedImage) ret.append(i).append(" ");
-        return ret.toString().trim();
-    }
-
     private CompressionData getCompressionData() {
         return new CompressionData(blockSize, maxBlocks, extraWidth, extraHeight,
-                image.length, image[0].length, dictionaryToString(), compressedImage.length,
-                compressedImageToString());
+                image.length, image[0].length, decompressionDictionary,
+                compressedImage);
     }
 
     private void trimImage() {
@@ -180,26 +172,6 @@ public class VectorQuantizer {
             System.arraycopy(image[i], 0, resizedImage[i], 0, resizedImage[i].length);
         }
         image = resizedImage;
-    }
-
-    private int[] stringToIntArray(String array) {
-        return Arrays.stream(array.split("\\W+")).mapToInt(Integer::parseInt).toArray();
-    }
-
-    private int[] stringCompressedImageToArray(String compressedImage) {
-        return stringToIntArray(compressedImage);
-    }
-
-    private void stringDictionaryFill(String dictionary) {
-        int[] dictionaryArray = stringToIntArray(dictionary);
-        int elementSize = blockSize * blockSize;
-        decompressionDictionary = new int[dictionaryArray.length][elementSize];
-
-        int idx = -1;
-        for (int i = 0; i < dictionaryArray.length; ++i) {
-            if (i % elementSize == 0) ++idx;
-            decompressionDictionary[idx][i % elementSize] = dictionaryArray[i];
-        }
     }
 
     private void fillBlock(int[][] image, int index, int[] block) {
@@ -246,7 +218,7 @@ public class VectorQuantizer {
         while (MAX_LOOP-- > 0) {
             if (!enhanceDistribution()) break;
         }
-
+        generateDictionary();
         buildCompressedImage();
         return getCompressionData();
     }

@@ -1,6 +1,7 @@
 package com.company;
 
 import javax.swing.*;
+import java.io.Console;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -20,10 +21,12 @@ public class Main {
         } catch (Exception ignored) {
         }
         new GUI();
-        int[][] test = new VectorQuantizer(LectureExample().compress()).decompress();
-        for (int[] ints : test) {
-            System.out.println(Arrays.toString(ints));
+        /*
+        int[][] test = new VectorQuantizer().decompress();
+        for(int[] arr : test){
+            System.out.println(Arrays.toString(arr));
         }
+        */
     }
 
     private static VectorQuantizer LectureExample() {
